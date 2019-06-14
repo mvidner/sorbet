@@ -149,6 +149,8 @@ optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableConte
     // consuming the tree.
 
     ChalkODMProp::NodesAndProp ret;
+    ret.prop.name = name;
+    ret.prop.type = ASTUtil::dupType(type.get());
 
     // Compute the getters
     if (rules) {

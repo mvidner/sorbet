@@ -41,7 +41,10 @@ namespace sorbet::dsl {
  */
 class ChalkODMProp final {
 public:
-    struct Prop {};
+    struct Prop {
+        core::NameRef name;
+        std::unique_ptr<ast::Expression> type;
+    };
 
     struct NodesAndProp {
         // invariant: !nodes.empty().
