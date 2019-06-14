@@ -11,6 +11,16 @@ using namespace std;
 
 namespace sorbet::dsl {
 
+bool isT(ast::Expression *expr) {
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return t != nullptr && t->cnst == core::Names::Constants::T() && ast::isa_tree<ast::EmptyTree>(t->scope.get());
+}
+
+bool ChalkODMProp::isTStruct(ast::Expression *expr) {
+    auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope.get());
+}
+
 optional<ChalkODMProp::NodesAndProp> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
         // TODO(jez) Verify whether this DSL pass is safe to run in for autogen

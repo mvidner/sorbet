@@ -54,6 +54,10 @@ public:
 
     static std::optional<NodesAndProp> replaceDSL(core::MutableContext ctx, ast::Send *send);
 
+    // this determines if an expression is syntactically `T::Struct`. this might not actually refer to the `T::Struct`
+    // that we define for them, but we don't know that information in the DSL passes.
+    static bool isTStruct(ast::Expression *expr);
+
     ChalkODMProp() = delete;
 };
 

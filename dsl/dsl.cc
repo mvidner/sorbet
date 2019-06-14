@@ -1,4 +1,5 @@
 #include "dsl/dsl.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
@@ -112,10 +113,37 @@ public:
             return classDef;
         }
 
+        auto synthesizeInitialize = false;
+        for (auto &a : classDef->ancestors) {
+            if (ChalkODMProp::isTStruct(a.get())) {
+                synthesizeInitialize = true;
+                break;
+            }
+        }
         auto oldRHS = std::move(classDef->rhs);
         classDef->rhs.clear();
-        classDef->rhs.reserve(oldRHS.size());
+        // the `2` is: 1 for the sig, 1 for the method
+        classDef->rhs.reserve(oldRHS.size() + (synthesizeInitialize ? 0 : 2));
 
+        if (synthesizeInitialize) {
+            // we define ours synthesized initialize first so that if the user wrote one themselves, it overrides ours.
+            auto loc = classDef->loc;
+            ast::MethodDef::ARGS_store args;
+            ast::Hash::ENTRY_store sigKeys;
+            ast::Hash::ENTRY_store sigVals;
+            args.reserve(props.size());
+            sigKeys.reserve(props.size());
+            sigVals.reserve(props.size());
+            for (auto &prop : props) {
+                args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
+                sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
+                sigVals.emplace_back(std::move(prop.type));
+            }
+            classDef->rhs.emplace_back(
+                ast::MK::SigVoid(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigVals))));
+            classDef->rhs.emplace_back(ast::MK::Method(loc, loc, core::Names::initialize(), std::move(args),
+                                                       ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
+        }
         for (auto &stat : oldRHS) {
             if (replaceNodes.find(stat.get()) == replaceNodes.end()) {
                 classDef->rhs.emplace_back(std::move(stat));
