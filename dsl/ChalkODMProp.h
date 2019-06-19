@@ -7,17 +7,19 @@ namespace sorbet::dsl {
 /**
  * This class desugars things of the form
  *
- *   prop :foo, String
+ *   prop :foo, Type
  *
  * into
  *
- *   sig {returns(T.nilable(String))}
- *   def foo; T.cast(nil, T.nilable(String)); end
- *   sig {params(arg0: String).returns(NilClass)}
- *   def foo=(arg0); end
+ *   sig {returns(Type)}
+ *   def foo; ...; end
+ *   sig {params(x: Type).returns(Type)}
+ *   def foo=(x); ...; end
  *   class Mutator < Chalk::ODM::Mutator
- *     sig {params(arg0: String).returns(NilClass)}
- *     def foo=(arg0); end
+ *     sig {returns(Type)}
+ *     def foo(x); end
+ *     sig {params(x: Type).returns(Type)}
+ *     def foo=(x); end
  *   end
  *
  * We try to implement a simple approximation of the functionality that
@@ -26,12 +28,9 @@ namespace sorbet::dsl {
  *
  * Any `prop` method call in a class body whose shape matches is considered.
  * `const ...` is the same as `prop ..., immutable: true`.
- * The getter will return `T.nilable(TheType)` and the setter will take `TheType`.
  * In the last param if there is a:
- *   type: TheType - overrides the second param.
- *   array: TheType - overrides the second param and makes it an `Array[TheValue]`.
- *   default: - the getter isn't nilable anymore.
- *   factory: - same as default:.
+ *   type: Type - overrides the second param.
+ *   array: Type - overrides the second param and makes it an `Array[Type]`.
  *
  * Any deviation from this expected shape stops the desugaring.
  *
