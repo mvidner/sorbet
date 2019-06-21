@@ -135,7 +135,8 @@ public:
             sigKeys.reserve(props.size());
             sigVals.reserve(props.size());
             for (auto &prop : props) {
-                args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
+                auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
+                args.emplace_back(std::move(arg));
                 sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
                 sigVals.emplace_back(std::move(prop.type));
             }
