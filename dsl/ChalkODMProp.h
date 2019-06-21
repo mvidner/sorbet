@@ -43,6 +43,7 @@ public:
     struct Prop {
         core::NameRef name;
         std::unique_ptr<ast::Expression> type;
+        bool optional;
     };
 
     struct NodesAndProp {

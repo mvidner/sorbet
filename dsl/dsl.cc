@@ -136,6 +136,9 @@ public:
             sigVals.reserve(props.size());
             for (auto &prop : props) {
                 auto arg = ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name));
+                if (prop.optional) {
+                    arg = ast::MK::OptionalArg(loc, std::move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)));
+                }
                 args.emplace_back(std::move(arg));
                 sigKeys.emplace_back(ast::MK::Symbol(loc, prop.name));
                 sigVals.emplace_back(std::move(prop.type));
