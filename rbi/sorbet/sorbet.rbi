@@ -139,6 +139,19 @@ class Sorbet::Private::Static::ENVClass
 
   sig do
     params(
+        hash: T::Hash[String, T.nilable(String)],
+    )
+    .returns(Sorbet::Private::Static::ENVClass)
+  end
+  def replace(hash); end
+
+  sig do
+    returns(T::Hash[String, String])
+  end
+  def to_hash; end
+
+  sig do
+    params(
         key: T::Hash[String, T.nilable(String)],
     )
     .returns(Sorbet::Private::Static::ENVClass)
